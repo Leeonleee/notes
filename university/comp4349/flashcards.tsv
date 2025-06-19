@@ -1,0 +1,129 @@
+Informal definition of cloud computing	Renting or sharing IT resources—​infrastructure, hardware, networks and software—over the internet, with innovative ways to measure, bill and deliver those resources
+NIST definition of cloud computing	On-demand network access to a shared pool of configurable computing resources
+Four main IT-resource categories in the cloud	Infrastructure; hardware; networks; software
+Three cloud service models	Software as a Service (SaaS); Platform as a Service (PaaS); Infrastructure as a Service (IaaS)
+SaaS in one sentence	Use the provider’s application without managing the underlying infrastructure
+PaaS in one sentence	Deploy and run your own applications in a provider-managed environment
+IaaS in one sentence	Full control over virtualised computing, storage, networking and installed software
+Definition of a web service	Internet-accessible software that exchanges requests and responses in standardised formats
+AWS “Region” vs “Availability Zone”	Region = geographic area hosting multiple data centres; AZ = one isolated data-centre cluster inside a Region that provides fault tolerance
+Three common AWS billing factors	Usage time; data transfer (traffic); storage consumed
+IAM user vs group vs policy	User = individual identity; group = collection of users sharing permissions; policy = JSON document that defines allowed or denied actions on resources
+Identity-based vs resource-based IAM policy	Identity-based is attached to a user, group or role; resource-based is attached directly to the AWS resource being accessed
+Authentication vs authorisation	Authentication verifies who you are; authorisation specifies what an authenticated identity is allowed to do
+Two cloud storage models	SaaS storage (looks like an extended hard drive, rich UI); IaaS/PaaS storage (independent service or building block, more control, fewer UI features)
+Amazon S3 essentials	Access via API or tools; unlimited object storage; high latency; very low cost
+Amazon EBS essentials	Network-attached block storage for one EC2 instance; up to 16 TiB; low latency; low cost
+EC2 instance store essentials	Local NVMe/SATA attached to the host; up to ~305 TB; very low latency; ephemeral
+Amazon EFS essentials	NFS v4.1 file system mounted from EC2; virtually unlimited size; medium latency; medium cost
+How is an S3 bucket structured?	Flat key–value namespace; “folders” are 0-byte objects whose names act as prefixes
+Typical S3 use-cases	Backup & archive; static website or content hosting; software/patch delivery
+Three components of S3 pricing	Stored data (GB-months); request count; outbound data transfer (free to CloudFront or EC2 in same Region)
+Purpose of an S3 lifecycle rule	Automatically move objects to cheaper storage tiers or expire/delete them
+Key facts about S3 versioning	New upload = new version ID; delete adds a delete marker; recovery or permanent delete requires specifying the exact version ID
+S3 replication caveats	Replicates to another bucket (optionally delete markers) but will not replicate hard deletes
+Why is S3 highly durable?	Data is automatically replicated across multiple AZs in a Region
+Virtualisation definition	Running multiple isolated virtual machines on one physical host
+Three benefits of virtualisation	Resource efficiency; high availability/fail-over; memory expansion/over-commit
+Virtualisation transparency	Users and software cannot tell the difference between virtual and physical resources
+Role of a hypervisor	Allocates host CPU, memory, disk and network while preventing VMs from interfering with each other
+Type-1 vs Type-2 hypervisor	Type-1 (bare-metal) runs directly on hardware for best performance; Type-2 runs on top of a host OS for easier setup
+Four resources commonly virtualised	CPU (time-shared vCPUs); memory (dedicated page slices); disk (partition/LUN); network (time-shared NIC)
+Unique trait of Xen hypervisor	Domain 0 (privileged VM) handles I/O for unprivileged guest VMs
+Unique trait of Hyper-V	Root partition manages I/O and guest life-cycle; child partitions are the actual VMs
+Unique trait of KVM	Turns the Linux kernel into a bare-metal hypervisor; each guest runs as a normal Linux process
+Purpose of QEMU	User-mode or full-system emulator that virtualises I/O devices, often paired with KVM
+Purpose of libvirt	Common management API/daemon for controlling many different hypervisors
+Amazon EC2 definition	Resizable virtual compute capacity in the AWS cloud
+Seven key choices when launching an EC2 instance	AMI; instance type; key pair; network & subnet; security group; storage mapping; IAM role; user-data script (plus optional tags)
+Two EC2 storage options	EBS (persistent, survives stop/start); instance store (ephemeral, disappears at stop/terminate)
+AWS Nitro System core pieces	Nitro cards for network/storage/monitoring offload + Nitro security chip; lightweight hardware hypervisor
+Bare-metal EC2 instance advantage	No Nitro hypervisor layer, giving near-native performance and direct hardware access
+Why is EBS “persistent”?	Block volume data survives instance stop/terminate (unless it’s the root volume with delete-on-termination)
+Four EBS volume types and typical use	GP SSD (boot/general); IO1/IO2 (high-performance IOPS); ST HDD (big data & logs); SC HDD (cold archival)
+Three factors in EBS pricing	Provisioned GB; provisioned IOPS; snapshot storage & cross-Region outbound
+EBS elasticity feature	You can manually increase volume size or adjust performance without downtime
+Virtual Private Cloud (VPC) definition	Logically isolated virtual network that you define in AWS, spanning multiple AZs with subnets, route tables and gateways
+Subnet restrictions	Belongs to exactly one AZ; its CIDR blocks cannot overlap with other subnets in the VPC
+Purpose of a CIDR block	Defines the IPv4 or IPv6 address range available to resources inside a VPC or subnet
+Three private IPv4 ranges allowed in VPCs	10.0.0.0/8; 172.16.0.0/12; 192.168.0.0/16
+Public IP vs Elastic IP	Public IP auto-assigns at launch and may change; Elastic IP is a static public IPv4 you own until you release it
+Five reserved IPs in every subnet	.0 network; .1 VPC router; .2 DNS; .3 future use; .255 broadcast
+Default security-group behaviour	Block all inbound traffic, allow all outbound traffic (stateful firewall)
+“Local” route in every route table	Enables all subnets in the same VPC to communicate with each other
+Cloud-native database idea	Database engines designed to exploit cloud scalability, elasticity and AZ redundancy
+Example relational vs non-relational AWS databases	Relational: RDS / Aurora; Non-relational: DynamoDB / Neptune
+Four big benefits of Amazon RDS	No server provisioning; easy vertical scaling; automated backup & patching; runs inside your VPC for isolation
+Multi-AZ RDS deployment	Primary synchronously replicates to standby in another AZ, providing automatic fail-over
+Purpose of an RDS read replica	Supports read-heavy workloads by asynchronously replicating data to a read-only copy
+Aurora separation of compute and storage	DB layer runs writers/readers; storage layer is an SSD-based cluster accessed over the network
+Aurora writer-reader limits	One writer + up to 15 low-latency read replicas
+Aurora 10 GB segment rule	Database volume split into 10 GB chunks, each copied six times across three AZs
+Aurora write quorum vs read quorum	Write succeeds after 4 of 6 copies acknowledge; read needs any 3 of 6
+How Aurora survives AZ loss	It keeps two copies in each AZ, so it tolerates losing an entire AZ plus one extra copy elsewhere
+Aurora’s “redo-log” write path	Primary sends only redo logs, not data pages, minimising foreground latency
+Two background jobs on Aurora storage nodes	Coalesce redo into pages; gossip with peers to fetch missing logs (then flush to S3)
+Aurora VCL, CPL, VDL definitions	VCL = highest LSN for which all earlier logs exist; CPL = highest LSN committed to a quorum within one Protection Group; VDL = highest CPL not exceeding VCL
+Elastic Network Interface (ENI)	A virtual NIC you can attach or detach from EC2 instances; supports multiple IPs and security groups
+Route-table “destination” vs “target”	Destination = CIDR to match; target = next hop device (e.g., IGW, NAT, ENI, peering)
+Purpose of an Internet Gateway	Enables internet-routable traffic to and from resources with public IPs in a VPC; one IGW per VPC
+Public vs private NAT Gateway	Public NAT translates private subnet traffic to a public IP for internet egress; private NAT routes traffic to other VPCs or AWS services in-Region without public exposure
+Stateless network ACL default	Allows all IPv4 inbound and outbound traffic until rules are added
+Interface vs gateway VPC endpoint	Interface endpoint = private ENI to most AWS services; gateway endpoint = route-table entry for S3 or DynamoDB
+How overlapping IPs are possible in AWS	Each VPC is logically isolated, so identical private CIDR blocks can coexist on shared multi-tenant hosts
+AWS shared-responsibility split	AWS secures the cloud infrastructure; customers secure everything “in” the cloud they control
+Security responsibility by model	IaaS → customer controls most; PaaS → customer controls apps/data; SaaS → provider controls almost everything
+Five IAM best practices	Disable root keys; use roles not users; enable MFA; least-privilege policies; group-based permission assignment with CloudTrail auditing
+Linux identity IDs	UID 0 = root; 1-999 = system/service; 1000+ = normal users; sudo group members get admin rights
+ABAC advantage over RBAC	Permissions evaluate tags/attributes at runtime, so you don’t have to enumerate every user–resource mapping; easier to scale and audit
+Identity federation definition	Trust relationship where an external IdP authenticates the user and AWS grants temporary credentials via STS
+Three AWS services supporting federation	AWS IAM; IAM Identity Center (SSO); Amazon Cognito + STS
+Three main Cognito features	Sign-in (federated identities); user-pool directory with JWT tokens; identity pools for scoped AWS permissions
+Scalability vs elasticity	Scalability = ability to grow capacity; elasticity = automatic up-and-down adjustment with demand
+Horizontal vs vertical scaling	Horizontal adds more instances; vertical upgrades instance size/resources
+Three AWS services that enable elasticity	CloudWatch (metrics/alarms); Auto Scaling Groups; Elastic Load Balancer
+CloudWatch “metric”, “alarm”, “event”	Metric = time-series value; alarm = threshold action; event = rule that reacts to AWS state changes
+Auto Scaling Group essentials	Logical EC2 fleet defined by launch template; scales by policy or schedule across multiple AZs; uses ELB and health checks
+Four ELB families	ALB (HTTP L7); NLB (TCP/UDP L4); GWLB (transparent L4); CLB (legacy L4/L7)
+ELB listener vs rule	Listener = protocol+port handler; rule = if conditions then forward/redirect to target group
+Round-robin vs least-outstanding in ELB	Round-robin spreads requests evenly; least-outstanding sends new requests to the target with fewest current ones
+ELB health check vs ASG health check	ELB checks application endpoint; ASG checks EC2 instance status (OS/hardware)
+Two ways to scale RDS	Vertical: change DB-instance class; horizontal: add read replicas
+DevOps goal	Faster, more reliable software delivery through automation and shared responsibility between dev and ops
+Three DevOps cultural pillars	Collaboration & ownership; extensive automation; rapid feedback loops
+Four AWS DevOps service categories	CI/CD (Code*), IaC (CloudFormation/OpsWorks/SSM), monitoring (CloudWatch/CloudTrail/X-Ray), compute (ECS/Lambda/Fargate/Beanstalk)
+Continuous integration vs delivery vs deployment	CI = frequent, automated build & test; CD (delivery) = automatically prepare release to staging/prod; CD (deployment) = automatically push to prod when tests pass
+Two key parts of AWS CodePipeline	Stages (source, build, test, deploy) and actions (unit of work in a stage) triggered by events such as a Git commit
+Tight vs loose coupling in architecture	Tight = services directly depend on each other; loose = decoupled via load balancers, queues, or pub/sub so they can scale independently
+Amazon SQS basics	Point-to-point pull queue; messages persist until consumed or expire; supports Standard (at-least-once) and FIFO (exact-once)
+Short polling vs long polling in SQS	Short returns immediately, possibly empty; long waits up to 20 s, reducing empty responses and API calls
+Purpose of a dead-letter queue	Stores messages that can’t be processed successfully after retries, enabling debugging and isolation
+Amazon SNS basics	Pub/sub push service where one published message is fanned out to multiple subscribers (email, SMS, Lambda, SQS, HTTP, etc.)
+When to choose SNS FIFO topic	Use when strict order and exactly-once delivery to subscribers are required
+Container definition	Isolated user-space process that shares the host kernel using namespaces and cgroups for isolation and resource limits
+Two Linux features that power containers	Namespaces (isolation) and control groups (resource quotas)
+Low-level vs high-level container runtime	Low level (e.g., runc/LXC) just runs containers; high level (e.g., Docker) adds image format, registries and orchestration hooks
+Two key differences container vs VM	Containers share host kernel and start faster with lower overhead; VMs include a full guest OS for stronger isolation
+Docker “image” vs “container”	Image = read-only template defined by a Dockerfile; container = running instance with an extra writable layer
+Three ways to persist data for a container	Bind mount (host path); Docker volume (managed host path); tmpfs (in-memory)
+Four Docker networking modes	Host (share host stack); bridge (NATed default); none (no networking); overlay (cross-host with Swarm/ECS/EKS)
+Microservices architecture essence	Single application split into independently deployed, loosely coupled services communicating over lightweight protocols (HTTP/JSON, gRPC, etc.)
+Three AWS container services	ECR (image registry); ECS (orchestration); EKS (Kubernetes)
+Five steps to deploy microservices on ECS	Build → push image to ECR → define task (CPU, memory, ports) → create ECS service/target group → attach to load balancer
+ECS Service Discovery feature	Automatically registers task endpoints in Cloud Map DNS so services can find each other
+ECS Service Connect role	Provides service-to-service traffic routing with native ECS integration
+AWS App Mesh purpose	Full service-mesh layer offering traffic shaping, retries, mTLS, and observability across microservices
+Function as a Service definition	Run stateless code in response to events without managing servers; pay only for execution time
+Five key serverless vs serverful differences	Control (minimal vs full); scaling (auto vs manual); billing (per-use vs per-allocation); state (stateless vs stateful); start-up latency (ms vs minutes)
+Two big FaaS benefits	No server/patch management; low cost for bursty or infrequent workloads
+Three FaaS limitations	No local persistent disk; extra latency calling external storage; difficult fine-grained shared state
+Lambda “function”, “trigger” and “event”	Function = your code; trigger = resource/event that invokes it; event = JSON payload passed to the function handler
+Lambda execution environment	Runtime language container inside a short-lived microVM that re-uses for warm invocations
+Max /tmp storage size in Lambda	512 MB of ephemeral space
+Two factors in Lambda billing	Number of invocations; duration (GB-seconds) rounded to nearest ms
+Three Lambda anti-patterns	Monolithic mega-function; recursive self-triggers; function-to-function sync chains
+Three Lambda best practices	One small function per event; keep deployment package minimal; externalise state to managed data stores
+Trusted vs untrusted workloads in multitenancy	Trusted = internal org services can share hosts (ECS/EKS); untrusted = separate customers need stronger isolation (microVMs/Lambda)
+Compare container, microVM, VM isolation & overhead	Container: medium isolation, low overhead; MicroVM: strong isolation, medium overhead; full VM: strongest isolation, highest overhead
+Why place Lambda in a custom VPC?	To reach private RDS, EC2 or on-prem via VPN/Direct Connect; requires subnet, security group and VPC endpoint configuration
+Four built-in API Gateway features	Authentication & authorisation; throttling & quotas; monitoring/metrics; automatic DDoS & injection-filter protection
