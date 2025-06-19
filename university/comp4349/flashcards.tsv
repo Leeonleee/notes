@@ -127,3 +127,6 @@ Trusted vs untrusted workloads in multitenancy	Trusted = internal org services c
 Compare container, microVM, VM isolation & overhead	Container: medium isolation, low overhead; MicroVM: strong isolation, medium overhead; full VM: strongest isolation, highest overhead
 Why place Lambda in a custom VPC?	To reach private RDS, EC2 or on-prem via VPN/Direct Connect; requires subnet, security group and VPC endpoint configuration
 Four built-in API Gateway features	Authentication & authorisation; throttling & quotas; monitoring/metrics; automatic DDoS & injection-filter protection
+Event-driven architecture (EDA)	Uses events to trigger actions and enable communication between loosely coupled services
+Event (in EDA)	A change in state or an update that is emitted by a publisher
+Three core components of EDA	Event publisher → event router / store (e.g., SQS acting as an event cache) → event consumer
